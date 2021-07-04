@@ -8,18 +8,22 @@ namespace AIBB2DS3
 {
     class Program
     {
+        public static readonly string bbFilesFolderName = "LUABB";
+        public static readonly string ds3FilesFolderName = "LUADS3";
+
 
         static void Main(string[] args)
         {
             Console.WriteLine("BBtoDS3AI wrote by NamelessHoodie, on the behalf of KEZ");
-            Console.WriteLine("Usage: Copy decompiled Bloodborne LUA files inside the program folder and run it, or drag and drop them on the executable. The files will be converted to be compatible with DS3\n");
+            Console.WriteLine($"Usage: Copy decompiled Bloodborne LUA files inside the {bbFilesFolderName} directory adjacent to the executable and excute the program, or drag and drop them on the executable. The files will be converted to be compatible with DS3\n");
 
             Console.WriteLine("Below will be listed conversion results.");
             if (args.Length == 0)
             {
-                Console.WriteLine("No LUA files were dragged and dropped on the executable, proceeding with conversion of files in the program folder.");
+                Console.WriteLine($"No LUA files were dragged and dropped on the executable, proceeding with conversion of files in {bbFilesFolderName}.");
                 Console.WriteLine("---------------------------------");
-                foreach (var path in Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*lua"))
+
+                foreach (var path in Directory.GetFiles(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, bbFilesFolderName), "*lua"))
                 {
                     BBtoDS3AI(path);
                 }
@@ -102,10 +106,15 @@ namespace AIBB2DS3
                             aiReadStr = aiReadStr.Insert(i, strToAppend);
                             i += strToAppend.Length;
                         }
+                        else if (Regex.Match(aiReadStr, $"function .*{aiCreatureID}_ActAfter\\(.*, .*\\)").Success)
+                        {
+                            string strToAppend = $"\nRegisterTableGoal(GOAL_{aiCreatureID}_AfterAttackAct, \"GOAL_{aiCreatureID}_AfterAttackAct\")\nREGISTER_GOAL_NO_SUB_GOAL(GOAL_{aiCreatureID}_AfterAttackAct, true)\nGoal.Activate = function (arg0, arg1, arg2)\n    return {aiCreatureID}_ActAfter(arg1, arg2)\nend\n";
+                            aiReadStr = aiReadStr.Insert(i, strToAppend);
+                            i += strToAppend.Length;
+                        }
                         else
                         {
-                            Console.WriteLine($"{aiCreatureID}_ActAfter_RealTime not found in: {fileName}");
-                            isOk = false;
+                            Console.WriteLine($"{aiCreatureID}_ActAfter_RealTime  or {aiCreatureID}_ActAfter not found in: {fileName}");
                         }
 
                         if (Regex.Match(aiReadStr, $"function .*{aiCreatureID}Battle_Update\\(.*, .*\\)").Success)
@@ -162,7 +171,6 @@ namespace AIBB2DS3
                 else
                 {
                     Console.WriteLine($"{aiCreatureID}_ActAfter_AdjustSpace not found in: {fileName}");
-                    isOk = false;
                 }
             }
 
@@ -190,9 +198,17 @@ namespace AIBB2DS3
 
             if (isOk)
             {
-                Directory.CreateDirectory(path.Replace(fileName, "") + "LUADS3");
-                File.WriteAllText(path.Insert(path.IndexOf(fileName), @"LUADS3\"), aiReadStr);
-                Console.WriteLine($"Successfully converted: {path.Replace(fileName, "") + "LUADS3" + $"\\{fileName}"}");
+                string directory = Path.GetDirectoryName(path);
+                if (directory.EndsWith(bbFilesFolderName))
+                {
+                    directory = Directory.GetParent(directory).FullName;
+                }
+                directory = Path.Combine(directory, ds3FilesFolderName);
+                string directoryAndFilename = Path.Combine(directory, fileName);
+
+                Directory.CreateDirectory(directory);
+                File.WriteAllText(directoryAndFilename, aiReadStr);
+                Console.WriteLine($"Successfully converted: {directoryAndFilename}");
             }
             else
             {
