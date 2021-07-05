@@ -88,7 +88,7 @@ namespace AIBB2DS3
                             i += strToAppend.Length;
                         }
 
-                        if (Regex.Match(aiReadStr, $"function .*{aiCreatureID}Battle_Activate\\(.*, .*\\)").Success)
+                        if (Regex.Match(aiReadStr, $"function .*{aiCreatureID}Battle_Activate\\(.*, .*\\)", RegexOptions.IgnoreCase | RegexOptions.Compiled).Success)
                         {
                             string strToAppend = $"\nGoal.Activate = function (arg0, arg1, arg2)\n    return {aiCreatureID}Battle_Activate(arg1, arg2)\nend\n";
                             aiReadStr = aiReadStr.Insert(i, strToAppend);
@@ -96,17 +96,17 @@ namespace AIBB2DS3
                         }
                         else
                         {
-                            Console.WriteLine($"{aiCreatureID}Battle_Activate not found in: {fileName}");
+                            Console.WriteLine($"Step 1: {aiCreatureID}Battle_Activate not found in: {fileName}");
                             isOk = false;
                         }
 
-                        if (Regex.Match(aiReadStr, $"function .*{aiCreatureID}_ActAfter_RealTime\\(.*, .*\\)").Success)
+                        if (Regex.Match(aiReadStr, $"function .*{aiCreatureID}_ActAfter_RealTime\\(.*, .*\\)", RegexOptions.IgnoreCase | RegexOptions.Compiled).Success)
                         {
                             string strToAppend = $"\nRegisterTableGoal(GOAL_{aiCreatureID}_AfterAttackAct, \"GOAL_{aiCreatureID}_AfterAttackAct\")\nREGISTER_GOAL_NO_SUB_GOAL(GOAL_{aiCreatureID}_AfterAttackAct, true)\nGoal.Activate = function (arg0, arg1, arg2)\n    return {aiCreatureID}_ActAfter_RealTime(arg1, arg2)\nend\n";
                             aiReadStr = aiReadStr.Insert(i, strToAppend);
                             i += strToAppend.Length;
                         }
-                        else if (Regex.Match(aiReadStr, $"function .*{aiCreatureID}_ActAfter\\(.*, .*\\)").Success)
+                        else if (Regex.Match(aiReadStr, $"function .*{aiCreatureID}_ActAfter\\(.*, .*\\)", RegexOptions.IgnoreCase | RegexOptions.Compiled).Success)
                         {
                             string strToAppend = $"\nRegisterTableGoal(GOAL_{aiCreatureID}_AfterAttackAct, \"GOAL_{aiCreatureID}_AfterAttackAct\")\nREGISTER_GOAL_NO_SUB_GOAL(GOAL_{aiCreatureID}_AfterAttackAct, true)\nGoal.Activate = function (arg0, arg1, arg2)\n    return {aiCreatureID}_ActAfter(arg1, arg2)\nend\n";
                             aiReadStr = aiReadStr.Insert(i, strToAppend);
@@ -114,10 +114,10 @@ namespace AIBB2DS3
                         }
                         else
                         {
-                            Console.WriteLine($"{aiCreatureID}_ActAfter_RealTime  or {aiCreatureID}_ActAfter not found in: {fileName}");
+                            Console.WriteLine($"Step 1: {aiCreatureID}_ActAfter_RealTime  or {aiCreatureID}_ActAfter not found in: {fileName}");
                         }
 
-                        if (Regex.Match(aiReadStr, $"function .*{aiCreatureID}Battle_Update\\(.*, .*\\)").Success)
+                        if (Regex.Match(aiReadStr, $"function .*{aiCreatureID}Battle_Update\\(.*, .*\\)", RegexOptions.IgnoreCase | RegexOptions.Compiled).Success)
                         {
                             string strToAppend = $"\nGoal.Update = function (arg0, arg1, arg2)\n    return {aiCreatureID}Battle_Update(arg1, arg2)\nend\n";
                             aiReadStr = aiReadStr.Insert(i, strToAppend);
@@ -125,11 +125,11 @@ namespace AIBB2DS3
                         }
                         else
                         {
-                            Console.WriteLine($"{aiCreatureID}Battle_Update not found in: {fileName}");
+                            Console.WriteLine($"Step 1: {aiCreatureID}Battle_Update not found in: {fileName}");
                             isOk = false;
                         }
 
-                        if (Regex.Match(aiReadStr, $"function .*{aiCreatureID}Battle_Terminate\\(.*, .*\\)").Success)
+                        if (Regex.Match(aiReadStr, $"function .*{aiCreatureID}Battle_Terminate\\(.*, .*\\)", RegexOptions.IgnoreCase | RegexOptions.Compiled).Success)
                         {
                             string strToAppend = $"\nGoal.Terminate = function (arg0, arg1, arg2)\n    return {aiCreatureID}Battle_Terminate(arg1, arg2)\nend\n";
                             aiReadStr = aiReadStr.Insert(i, strToAppend);
@@ -137,11 +137,11 @@ namespace AIBB2DS3
                         }
                         else
                         {
-                            Console.WriteLine($"{aiCreatureID}Battle_Terminate not found in: {fileName}");
+                            Console.WriteLine($"Step 1: {aiCreatureID}Battle_Terminate not found in: {fileName}");
                             isOk = false;
                         }
 
-                        if (Regex.Match(aiReadStr, $"function .*{aiCreatureID}Battle_Interupt\\(.*, .*\\)").Success)
+                        if (Regex.Match(aiReadStr, $"function .*{aiCreatureID}Battle_Interupt\\(.*, .*\\)", RegexOptions.IgnoreCase | RegexOptions.Compiled).Success)
                         {
                             string strToAppend = $"\nGoal.Interrupt = function (arg0, arg1, arg2)\n    return {aiCreatureID}Battle_Interupt(arg1, arg2)\nend";
                             aiReadStr = aiReadStr.Insert(i, strToAppend);
@@ -149,7 +149,7 @@ namespace AIBB2DS3
                         }
                         else
                         {
-                            Console.WriteLine($"{aiCreatureID}Battle_Interupt not found in: {fileName}");
+                            Console.WriteLine($"Step 1: {aiCreatureID}Battle_Interupt not found in: {fileName}");
                             isOk = false;
                         }
 
@@ -160,37 +160,51 @@ namespace AIBB2DS3
                 }
             }
 
-            //Step 2
+            //Step 2 - Main
             {
-                Match rgx = Regex.Match(aiReadStr, $"function {aiCreatureID}_ActAfter_AdjustSpace\\(arg0, arg1, arg2\\)\n.*arg1:AddSubGoal\\(GOAL_COMMON_If, 10, 0\\)");
+                Match rgx = Regex.Match(aiReadStr, $"function .*ActAfter_AdjustSpace\\(.*\\).*\n.*arg1:AddSubGoal\\(GOAL_COMMON_If, 10, 0\\)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+                Match realTime = Regex.Match(aiReadStr, $"function .*{aiCreatureID}_ActAfter_RealTime\\(.*, .*\\)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+                Match actAfter = Regex.Match(aiReadStr, $"function .*{aiCreatureID}_ActAfter\\(.*, .*\\)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
                 if (rgx.Success)
                 {
-                    string fixstr = Regex.Replace(rgx.Value, "function .*ActAfter_AdjustSpace\\(.*\\)", "").TrimStart("\n"[0]).TrimStart();
-                    aiReadStr = aiReadStr.Replace(fixstr, $"arg1:AddSubGoal(GOAL_{aiCreatureID}_AfterAttackAct, 10)");
+                    if (realTime.Success || actAfter.Success)
+                    {
+                        String[] strArrWork = SplitByIndex(aiReadStr, rgx.Index, rgx.Index + rgx.Length);
+                        strArrWork[1] = Regex.Replace(strArrWork[1], "arg1:AddSubGoal\\(GOAL_COMMON_If, 10, 0\\)", $"arg1:AddSubGoal(GOAL_{aiCreatureID}_AfterAttackAct, 10)");
+                        aiReadStr = strArrWork[0] + strArrWork[1] + strArrWork[2];
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Step 2: {aiCreatureID}_ActAfter_RealTime or {aiCreatureID}_ActAfter  not found in: {fileName}");
+                    }
                 }
                 else
                 {
-                    Console.WriteLine($"{aiCreatureID}_ActAfter_AdjustSpace not found in: {fileName}");
+                    Console.WriteLine($"Step 2: {aiCreatureID}_ActAfter_AdjustSpace not found in: {fileName}");
                 }
             }
 
             //step 3 - A
             {
-                aiReadStr = Regex.Replace(aiReadStr, "Kanshu_Act", "Kankyaku_Act");
+                aiReadStr = Regex.Replace(aiReadStr, "Kanshu_Act", "Kankyaku_Act", RegexOptions.IgnoreCase | RegexOptions.Compiled);
             }
 
             //step 3 - B
             {
-                Match rgx = Regex.Match(aiReadStr, ".*GOAL_COMMON_SpinStep.*");
-                for (int i = 0; i < rgx.Groups.Count; i++)
+                MatchCollection rgx = Regex.Matches(aiReadStr, ".*GOAL_COMMON_SpinStep.*", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+                foreach (Match match in rgx)
                 {
-                    Capture match = rgx.Groups[i];
-
                     string[] strEditArray = SplitByIndex(aiReadStr, match.Index, match.Index + match.Length);
 
+                    strEditArray[1] = strEditArray[1].Replace("700", "6000");
                     strEditArray[1] = strEditArray[1].Replace("701", "6001");
                     strEditArray[1] = strEditArray[1].Replace("702", "6002");
-                    strEditArray[1] = strEditArray[1].Replace("703", "`6003");
+                    strEditArray[1] = strEditArray[1].Replace("703", "6003");
+                    
+                    strEditArray[1] = strEditArray[1].Replace("710", "6000");
+                    strEditArray[1] = strEditArray[1].Replace("711", "6001");
+                    strEditArray[1] = strEditArray[1].Replace("712", "6002");
+                    strEditArray[1] = strEditArray[1].Replace("713", "6003");
 
                     aiReadStr = strEditArray[0] + strEditArray[1] + strEditArray[2];
                 }
@@ -212,83 +226,10 @@ namespace AIBB2DS3
             }
             else
             {
-                Console.WriteLine($"No converted files will be generated for: ({fileName}) due to conversion errors");
+                Console.WriteLine($"No converted file will be generated for: ({fileName}) due to conversion errors");
             }
         }
 
-        public static IndexStartEnd DigFunction(string luaFileStr, int functionStartIndex)
-        {
-            int funLenght = 2;
-            int endLayers = 0;
-            int charSkipParseNum = 0;
-            for (int funseek = functionStartIndex; funseek < luaFileStr.Length; funseek++)
-            {
-                if (isStrAtIndexOfStr(luaFileStr, funseek, "function"))
-                {
-                    charSkipParseNum += "function".Length;
-                    endLayers++;
-                    for (int i = funseek; i < luaFileStr.Length; i++)
-                    {
-                        funLenght++;
-
-                        if (charSkipParseNum > 0)
-                        {
-                            charSkipParseNum--;
-                        }
-                        else
-                        {
-                            if (isStrAtIndexOfStr(luaFileStr, i, "elseif"))
-                            {
-                                if (Regex.Match(luaFileStr.Substring(funseek), "elseif.*then").Success)
-                                    Debug.WriteLine("elseif");
-                                {
-                                    charSkipParseNum += "elseIf".Length;
-                                    endLayers++;
-                                }
-                            }
-                            else if (isStrAtIndexOfStr(luaFileStr, i, "if"))
-                            {
-                                if (Regex.Match(luaFileStr.Substring(funseek), "if.*then").Success)
-                                {
-                                    Debug.WriteLine("if");
-                                    charSkipParseNum += "if".Length;
-                                    endLayers++;
-                                }
-                            }
-                            else if (isStrAtIndexOfStr(luaFileStr, i, "while"))
-                            {
-                                if (Regex.Match(luaFileStr.Substring(funseek), "while.*\\(.*\\)").Success)
-                                {
-                                    Debug.WriteLine("while");
-                                    charSkipParseNum += "while".Length;
-                                    endLayers++;
-                                }
-                            }
-                            else if (isStrAtIndexOfStr(luaFileStr, i, "end\n"))
-                            {
-                                Debug.WriteLine("end");
-                                charSkipParseNum += "end".Length;
-                                endLayers--;
-                            }
-                        }
-
-
-                        if (endLayers == 0)
-                        {
-                            return new IndexStartEnd(functionStartIndex, funLenght);
-                        }
-                    }
-                    throw new Exception("There was an error parsing the LUA function.");
-                }
-                else
-                {
-                    funLenght++;
-                }
-            }
-
-            throw new Exception("There is no LUA function after the provided index");
-
-        }
         public static string[] SplitByIndex(string input, int indexStart, int indexEnd) 
         {
             if (indexEnd < input.Length)
@@ -313,18 +254,6 @@ namespace AIBB2DS3
                 return subStr == strToMatchAgainst;
             }
             return false;
-        }
-    }
-
-    public class IndexStartEnd
-    {
-        public int IndexStart { get; }
-        public int IndexEnd { get; }
-
-        public IndexStartEnd(int IndexStart, int IndexEnd)
-        {
-            this.IndexStart = IndexStart;
-            this.IndexEnd = IndexEnd;
         }
     }
 }
