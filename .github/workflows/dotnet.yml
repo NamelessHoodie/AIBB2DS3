@@ -22,7 +22,7 @@ jobs:
         run: dotnet build --configuration Release --no-restore
 
       - name: Publish
-        run: dotnet publish '${{ runner.workspace }}/AIBB2DS3/BBAI2DS3/BBAI2DS3.csproj' --configuration Release -o deploy
+        run: dotnet publish '${{ runner.workspace }}/BBAI2DS3/BBAI2DS3.csproj' --configuration Release -o deploy
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
